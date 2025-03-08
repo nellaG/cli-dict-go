@@ -1,4 +1,4 @@
-module cli-dict-go
+module cmdic
 
 go 1.24.0
 
