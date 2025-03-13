@@ -80,6 +80,32 @@ func ParseDetail(htmlStr, wordId, category string) (string, error) {
 	return "", nil
 }
 
+func ParseExample(exampleURL string) (string, error) {
+	resp, err := http.Get(exampleURL)
+	if err != nil {
+		return "", fmt.Errorf("failed to fetch example URL: %w", err)
+	}
+	defer resp.Body.Close()
+
+	doc, err := goquery.NewDocumentFromReader(resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("failed to create document: %w", err)
+	}
+
+	var sentences []string
+	doc.Find("li").Each(
+		func(i int, s *goquery.Selection) {
+			engPhrase := s.Find("span.txt_example").Text()
+			if idx := strings.Index(engPhrase, "\n"); idx != -1 {
+				engPhrase = engPhrase[:idx]
+			}
+			meanPhrase := s.Find("span.mean_example").Text()
+			phraseSet := fmt.Sprintf("%s\n -> %s\n\n", engPhrase, meanPhrase)
+			sentences = append(sentences, phraseSet)
+		})
+	return strings.Join(sentences, ""), nil
+}
+
 func FetchURL(url string) (string, error) {
 	resp, err := http.Get(url)
 	if err != nil {
@@ -92,4 +118,13 @@ func FetchURL(url string) (string, error) {
 		return "", fmt.Errorf("failed to read response: %w", err)
 	}
 	return string(bytes), nil
+}
+
+func ExampleURL(wordId string, page int) string {
+	exampleHost := DAUM_DICT_HOST + "word/view_example_more.do"
+	q := url.Values{}
+	q.Set("wordid", wordId)
+	q.Set("summaryid", "etc")
+	q.Set("page", fmt.Sprintf("%d", page))
+	return exampleHost + "?" + q.Encode()
 }

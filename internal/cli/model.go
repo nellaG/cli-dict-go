@@ -67,6 +67,14 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.output = "Error Occured"
 			} else if input == "q" {
 				return m, tea.Quit
+			} else if input == "e" {
+				exampleURL := dic.ExampleURL(m.wordId, 1)
+				result, err := dic.ParseExample(exampleURL)
+				if err != nil {
+					m.output = fmt.Sprintf("Error parsing example: %v", err)
+				} else {
+					m.output = result
+				}
 			} else if input == "a" || input == "s" {
 				if m.detailedText == "" {
 					resp, err := http.Get(m.detailedURL)
