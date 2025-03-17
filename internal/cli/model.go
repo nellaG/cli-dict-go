@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/charmbracelet/lipgloss"
+
 	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -31,9 +33,10 @@ type Model struct {
 	wordId       string
 	detailedURL  string
 	detailedText string
+	searchTerm   string
 }
 
-func NewModel(wordId, detailedURL string) Model {
+func NewModel(wordId, detailedURL, searchTerm string) Model {
 	ti := textinput.New()
 	ti.Placeholder = "명령어 입력 (a/e/s/q)"
 	ti.Focus()
@@ -45,6 +48,7 @@ func NewModel(wordId, detailedURL string) Model {
 		output:      "",
 		wordId:      wordId,
 		detailedURL: detailedURL,
+		searchTerm:  searchTerm,
 	}
 }
 
@@ -73,7 +77,13 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				if err != nil {
 					m.output = fmt.Sprintf("Error parsing example: %v", err)
 				} else {
-					m.output = result
+
+					paragraphs := strings.Split(result, "\n\n")
+					highlightStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("205")).Bold(true)
+					for i, para := range paragraphs {
+						paragraphs[i] = strings.ReplaceAll(para, m.searchTerm, highlightStyle.Render(m.searchTerm))
+					}
+					m.output = lipgloss.JoinVertical(lipgloss.Top, paragraphs...)
 				}
 			} else if input == "a" || input == "s" {
 				if m.detailedText == "" {
