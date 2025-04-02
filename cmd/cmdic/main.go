@@ -37,7 +37,7 @@ func main() {
 
 	detailedURL := fmt.Sprintf("https://dic.daum.net/word/view.do?wordid=%s", wordId)
 
-	p := tea.NewProgram(cli.NewModel(wordId, detailedURL, keyword))
+	p := tea.NewProgram(cli.NewModel(wordId, detailedURL, dic.ExampleURL(wordId, 1), keyword))
 	if _, err := p.Run(); err != nil {
 		log.Fatalf("Error running program: %v", err)
 	}

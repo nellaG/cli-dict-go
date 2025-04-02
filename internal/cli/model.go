@@ -32,11 +32,12 @@ type Model struct {
 	output       string
 	wordId       string
 	detailedURL  string
+	exampleURL   string
 	detailedText string
 	searchTerm   string
 }
 
-func NewModel(wordId, detailedURL, searchTerm string) Model {
+func NewModel(wordId, detailedURL, exampleURL, searchTerm string) Model {
 	ti := textinput.New()
 	ti.Placeholder = "명령어 입력 (a/e/s/q)"
 	ti.Focus()
@@ -48,6 +49,7 @@ func NewModel(wordId, detailedURL, searchTerm string) Model {
 		output:      "",
 		wordId:      wordId,
 		detailedURL: detailedURL,
+		exampleURL:  exampleURL,
 		searchTerm:  searchTerm,
 	}
 }
@@ -72,7 +74,12 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			} else if input == "q" {
 				return m, tea.Quit
 			} else if input == "e" {
-				exampleURL := dic.ExampleURL(m.wordId, 1)
+				var exampleURL string
+				if m.exampleURL != "" {
+					exampleURL = m.exampleURL
+				} else {
+					exampleURL = dic.ExampleURL(m.wordId, 1)
+				}
 				result, err := dic.ParseExample(exampleURL)
 				if err != nil {
 					m.output = fmt.Sprintf("Error parsing example: %v", err)
